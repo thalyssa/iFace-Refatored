@@ -1,5 +1,3 @@
-import javax.swing.plaf.synth.SynthOptionPaneUI;
-import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Scanner;
 import static java.lang.System.exit;
