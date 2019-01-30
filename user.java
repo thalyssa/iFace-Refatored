@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class user {
+public class user extends messages{
 
     private int id;
     private String login;
@@ -55,6 +55,7 @@ public class user {
                 if(option == 1){
                     //Colocar os usuários um na lista de amigos do outro;
                     friends.add(request.get(i));
+                    request.get(i).friends.add(this);
                 }
 
                 request.remove(request.get(i));
@@ -79,18 +80,16 @@ public class user {
         }//Fim do for
     }
 
+    @Override
     public void recieveMessage(String message){
         messages.add(message);
     }
 
-
-    //Exibe as mensagens do usuário
     public void getMessages(){
-        System.out.println("--CAIXA DE MENSAGENS--");
+        System.out.println("--CAIXA DE MENSAGENS PESSOAIS--");
         for(int i=0;i<messages.size();i++){
             System.out.println(messages.get(i)+"\n");
         }
-
     }
 
     public user(int id, String login, String password, String username){
@@ -98,10 +97,6 @@ public class user {
         this.login = login;
         this.password = password;
         this.username = username;
-    }
-
-    public user(int id){
-        this.id = id;
     }
 
 }
