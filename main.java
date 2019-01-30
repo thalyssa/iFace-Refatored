@@ -1,3 +1,5 @@
+import javax.swing.plaf.synth.SynthOptionPaneUI;
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Scanner;
 import static java.lang.System.exit;
@@ -7,13 +9,13 @@ public class main {
     //RELATIVO AO USUÁRIO
     public static ArrayList<user> users = new ArrayList<user>();
     public static int countUsers = 0;
-    public static int userActualID; //Id do usuário que está com a sessão aberta
+    public static user userActualID; //Usuário que está com a sessão aberta
 
     //RELATIVO ÀS COMUNIDADES
     public static ArrayList<community> communities = new ArrayList<community>();
     public static int countCom = 0; //Quantidade de comunidades existentes;
 
-    //Cria uma conta de usuario no iFace -- OK
+    //Cria uma conta de usuario no iFace
     public static void createUser(){
         Scanner board = new Scanner(System.in);
         String login;
@@ -34,7 +36,7 @@ public class main {
             countUsers++;
     }
 
-    //Loga com um usuário no iFace e exibe a interface inicial -- OK
+    //Loga com um usuário no iFace e exibe a interface inicial
     public static void signIn(){
         Scanner board = new Scanner(System.in);
         String login;
@@ -51,8 +53,8 @@ public class main {
                 if(!password.equals(users.get(i).getPassword())){
                     System.out.println("Senha incorreta");
                 }else {
-                    //Exibe a tela de login e armazena o ID do usuário para usar nas operações como: Envio de mensagens, edição de perfil, etc.
-                    userActualID = users.get(i).getId();
+                    //Exibe a tela de login e armazena o usuário para usar nas operações como: Envio de mensagens, edição de perfil, etc.
+                    userActualID = users.get(i);
                     System.out.println("\n");
                     userLoggedScreen();
                     return;
@@ -64,7 +66,7 @@ public class main {
         exit(0);
     }
 
-    //Edita o perfil de um usuário -- OK
+    //Edita o perfil de um usuário
     public static void editProfile(){
         int option;
         String data;
@@ -72,9 +74,9 @@ public class main {
 
         System.out.println("EDIÇÃO DE PERFIL");
         System.out.println("Dados atuais");
-        System.out.println("Login: " + users.get(userActualID).getLogin());
-        System.out.println("Senha: " + users.get(userActualID).getPassword());
-        System.out.println("Usuário: " + users.get(userActualID).getUsername());
+        System.out.println("Login: " + userActualID.getLogin());
+        System.out.println("Senha: " + userActualID.getPassword());
+        System.out.println("Usuário: " + userActualID.getUsername());
         System.out.println("Favor, escolha o campo que deseja alterar: ");
         System.out.println("1 - Login\n2 - Senha\n3 - Usuário");
 
@@ -84,19 +86,19 @@ public class main {
             case 1:
                 System.out.println("Digite o novo login: ");
                 data = board.next();
-                users.get(userActualID).setLogin(data);
+                userActualID.setLogin(data);
                 System.out.println("Login alterado com sucesso!");
                 break;
             case 2:
                 System.out.println("Digite a nova senha: ");
                 data = board.next();
-                users.get(userActualID).setPassword(data);
+                userActualID.setPassword(data);
                 System.out.println("Senha alterada com sucesso!");
                 break;
             case 3:
                 System.out.println("Digite o novo usuário: ");
                 data = board.next();
-                users.get(userActualID).setUsername(data);
+                userActualID.setUsername(data);
                 System.out.println("Usuário alterado com sucesso!");
                 break;
             default:
@@ -105,10 +107,13 @@ public class main {
         }
     }
 
-    //Deleta o perfil de um usuário
+   //Deleta o perfil de um usuário
     public static void deleteProfile(){
-        //DELETANDO AS INFORMAÇÕES DO PERFIL
-        users.remove(new user(userActualID));
+        for(int i=0;i<users.size();i++){
+            if(users.get(i).equals(userActualID)){
+                users.remove(i);
+            }
+        }
         System.out.println("Perfil deletado com sucesso!");
     }
 
@@ -121,6 +126,16 @@ public class main {
         }//Fim for
         return -1;
     }//Fim getUserID
+
+    //Retorna o ID da comunidade
+    public static int getComID(String login){
+        for(int i=0;i<communities.size();i++){
+            if(login.equals(communities.get(i).getName())){
+                return communities.get(i).getId();
+            }
+        }//Fim for
+        return -1;
+    }//Fim getComID
 
     /*Envia um pedido de amizade registrando o usuário remetente na lista de solicitações pendentes do destinatário
     Se o usuário destinatário recusar o pedido, o remetente é removido da sua lista*/
@@ -139,7 +154,7 @@ public class main {
             return;
         }
 
-        users.get(id).addFriendshipRequest(users.get(userActualID));
+        users.get(id).addFriendshipRequest(userActualID);
         System.out.println("Pedido enviado");
     }
 
@@ -156,9 +171,10 @@ public class main {
         System.out.println("Digite uma descrição para a comunidade: ");
         description = board.nextLine();
 
-        community newCon = new community(countCom, (moderator) users.get(userActualID), cName, description);
+        community newCon = new community(countCom, userActualID, cName, description);
 
         communities.add(newCon);
+        communities.get(countCom).addMember(userActualID);
         countCom++;
     }
 
@@ -174,23 +190,23 @@ public class main {
     }
 
     //Recuperar as informações do perfil
-    public static void searchProfile(){
+    public static void getProfile(){
         System.out.println("--PERFIL--");
-        System.out.println("Nome: " + users.get(userActualID).getUsername());
-        System.out.println("Login: " + users.get(userActualID).getLogin());
+        System.out.println("Nome: " + userActualID.getUsername());
+        System.out.println("Login: " + userActualID.getLogin());
         System.out.println("\n");
 
         //Exibe a lista de amigos
-       users.get(userActualID).getFriendsList();
+        userActualID.getFriendsList();
         System.out.println("\n");
 
         //Exibe as mensagens
-        users.get(userActualID).getMessages();
+        userActualID.getMessages();
 
-        System.out.println("\n--COMUNIDADES--");
-        for(int i=0;i<=communities.size();i++){
-            if(communities.get(i).getOwner().getId() == userActualID){
-                System.out.println("Nome: " + communities.get(i).getName());
+        System.out.println("\n--COMUNIDADES--\n");
+        for(int i=0;i<communities.size();i++){
+            if(communities.get(i).isMember(userActualID)){
+                System.out.println("- "+ communities.get(i).getName());
             }
         }
     }
@@ -200,7 +216,7 @@ public class main {
         Scanner keyboard = new Scanner(System.in);
         int option;
 
-        System.out.println("Bem vindo ao iFace, " + users.get(userActualID).getUsername() + "!\n Escolha o que deseja fazer: ");
+        System.out.println("Bem vindo ao iFace, " + userActualID.getUsername() + "!\n Escolha o que deseja fazer: ");
 
         System.out.println("1 - Editar perfil");
         System.out.println("2 - Adicionar amigo");
@@ -224,7 +240,7 @@ public class main {
                 sendFriendshipRqst();
                 break;
             case 3:
-                users.get(userActualID).getFriendshipRequests();
+                userActualID.getFriendshipRequests();
                 break;
             case 4:
                 createCommunity();
@@ -236,13 +252,18 @@ public class main {
                 joinCommunity();
                 break;
             case 7:
-                users.get(userActualID).getMessages();
+                userActualID.getMessages();
+                for(int i=0;i<communities.size();i++){
+                    if(communities.get(i).isMember(userActualID)){
+                        communities.get(i).getMessages();
+                    }
+                }
                 break;
             case 8:
                 sendMessage();
                 break;
             case 9:
-                searchProfile();
+                getProfile();
                 break;
             case 10:
                 deleteProfile();
@@ -256,26 +277,55 @@ public class main {
 
     }
 
-    //Enviar uma mensagem para outro usuário
+    //Enviar uma mensagem para outro usuário ou comunidade
     public static void sendMessage(){
         String message;
         String sendTo;
-        int id;
+        int id, option;
         Scanner keyboard = new Scanner(System.in);
 
-        System.out.println("Digite o destinatário: ");
-        sendTo = keyboard.nextLine();
+        System.out.println("Desejo enviar uma mensagem para um...");
+        System.out.println("1. Usuário\n2. Comunidade");
+        option = keyboard.nextInt();
 
-        id = getUserID(sendTo);
+        switch(option){
+            case 1:
+                System.out.println("Digite o e-mail do destinatário: ");
+                sendTo = keyboard.nextLine();
 
-        if(id == -1){
-            System.out.println("Usuário não encontrado!");
-        }else{
-            System.out.println("Digite a mensagem a ser enviada: ");
-            message = keyboard.nextLine() + "\nENVIADA POR: " + users.get(userActualID).getUsername();
+                id = getUserID(sendTo);
 
-            users.get(id).recieveMessage(message);
-        }
+                if(id == -1){
+                    System.out.println("Usuário não encontrado!");
+                }else{
+                    System.out.println("Digite a mensagem a ser enviada: ");
+                    message = keyboard.nextLine() + "\nENVIADA POR: " + userActualID.getUsername();
+
+                    users.get(id).recieveMessage(message);
+                }
+                break;
+            case 2:
+                System.out.println("Digite o nome da comunidade: ");
+                sendTo = keyboard.nextLine();
+
+                id = getComID(sendTo);
+
+                if(id == -1){
+                    System.out.println("Comunidade não encontrada!");
+                }else{
+                    System.out.println("Digite a mensagem a ser enviada: ");
+                    message = keyboard.nextLine() + "\nENVIADA POR: " + userActualID.getUsername();
+
+                    communities.get(id).recieveMessage(message);
+                }
+                break;
+            default:
+                System.out.println("Opção inválida!!!!");
+                break;
+
+        }//End switch
+
+
 
     }
 
@@ -287,7 +337,7 @@ public class main {
         System.out.println("Digite o ID da comunidade");
         id = keyboard.nextInt();
 
-        communities.get(id).addMember(users.get(userActualID));
+        communities.get(id).addMember(userActualID);
 
         System.out.println("Você agora é um membro desta comunidade!");
 
